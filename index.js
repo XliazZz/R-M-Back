@@ -7,7 +7,7 @@ const { saveApiData } = require('./src/controllers/saveApiData.js');
 const PORT = process.env.PORT || 3001
 
 // Syncing all the models at once.
-conn.sync({ force: true }).then(async () => {
+conn.sync({ force: false }).then(async () => {
   await saveApiData();
   console.log('DB connected');
   server.listen(PORT, () => {
