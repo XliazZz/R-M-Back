@@ -1,21 +1,39 @@
-// Importar el modelo Favorite desde DB_connection
+const jwt = require('jsonwebtoken');
 const { Favorite } = require('../../db');
+const { AUTH_SECRET } = process.env;
 
-// Definir la función deleteFav
-const deleteFav = async (id) => {
+const deleteFav = async (id, token) => {
+  try {
+    if (!token) {
+      throw new Error('Token no provider');
+    }
+
     try {
-        const favoriteFinded = await Favorite.findByPK(id);
+      const decoded = jwt.verify(token, AUTH_SECRET);
+      const userId = decoded.user.id;
 
-        if(!favoriteFinded) throw new Error('Favorite no finded');
+      const favoriteFound = await Favorite.findOne({
+        where: {
+            id: id,
+            userId: userId,
+        },
+      });
 
-        favoriteFinded.destroy();
+      if (!favoriteFound) {
+        throw new Error('Favorite not found');
+      }
 
-        return 'Success';
+      await favoriteFound.destroy();
+
+      return { message: 'Success' };
 
     } catch (error) {
-        return { error: error.message }
+      throw new Error('Token invalid: ' + error.message);
     }
+
+  } catch (error) {
+    throw new Error('Error deleting favorite: ' + error.message);
+  }
 };
 
-// Exportar la función deleteFav
-module.exports =  deleteFav ;
+module.exports =  deleteFav;

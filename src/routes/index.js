@@ -32,8 +32,6 @@ router.get('/episodes', async (req, res) => {
   };
 });
 
-// const jwt = require('jsonwebtoken');
-// const { AUTH_SECRET } = process.env;
 
 // ---------------------------------------- !RESPUESTAS ------------------------------------------
 
@@ -126,8 +124,18 @@ router.post('/fav', async (req, res) => {
   }
 });
 
-router.delete('/fav/:id', (req, res) => {
-    deleteFav(req, res);
+router.delete('/fav/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const token = req.body.token; 
+    const fav = await deleteFav(id, token);
+
+    res.status(200).json(fav);
+  } catch (error) {
+    console.error('Error in /fav route:', error);
+    res.status(404).send(error.message);
+  };
 });
 
 router.get('/fav', async (req, res) => {
